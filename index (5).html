@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  SHEA'S PORTFOLIO — index.html                              ║
+  ║  STRUCTURE:                                                  ║
+  ║   1. <head>    — fonts, meta tags                           ║
+  ║   2. <style>   — ALL CSS styling                            ║
+  ║   3. <body>    — ALL visible HTML content                   ║
+  ║   4. <script>  — Portfolio JS then Bat Cave game JS (IIFE)  ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shea — Developer in Progress</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<style>
+
+  /* ─── 1. CSS VARIABLES ──────────────────────────────────────────────── */
+
+  [data-theme="dark"] {
+    --bg-page:       #0d1117;
+    --bg-surface:    #161b22;
+    --bg-elevated:   #1c2128;
+    --text-primary:  #e6edf3;
+    --text-secondary:#8b949e;
+    --text-muted:    #484f58;
+    --accent:        #52b788;
+    --accent-dim:    #2d6a4f;
+    --border:        #30363d;
+    --shadow:        rgba(0,0,0,0.4);
+    --paf-red:       #cc2936;
+    --paf-black:     #1a1a1a;
+    --paf-green:     #009A44;
+  }
+
+  [data-theme="light"] {
+    --bg-page:       #fafaf7;
+    --bg-surface:    #ffffff;
+    --bg-elevated:   #f0f0eb;
+    --text-primary:  #1a1a2e;
+    --text-secondary:#555570;
+    --text-muted:    #aaaabc;
+    --accent:        #2d6a4f;
+    --accent-dim:    #1b4332;
+    --border:        #e0e0d8;
+    --shadow:        rgba(0,0,0,0.08);
+    --paf-red:       #bb1e2a;
+    --paf-black:     #111111;
+    --paf-green:     #007a33;
+  }
+
+  /* ── Maine mode: swaps accent to coastal pine-sea blue ─────────────────
+     Triggered by data-region="maine" on <html>.
+     Works independently of dark/light — both combinations are covered.   */
+  [data-theme="dark"][data-region="maine"] {
+    --accent:     #3d8fc4;
+    --accent-dim: #1f5e8a;
+    /* Reuse the PAF stripe variables to drive the hero tricolor stripe —
+       in Maine mode it becomes buff / pine-green / deep-blue               */
+    --paf-red:   #d4a55a;   /* buff wheat   */
+    --paf-black: #2a5c18;   /* pine green   */
+    --paf-green: #1a3a6b;   /* deep ME blue */
+  }
+  [data-theme="light"][data-region="maine"] {
+    --accent:     #1e5f8a;
+    --accent-dim: #133d5f;
+    --paf-red:   #c49040;
+    --paf-black: #1f4a12;
+    --paf-green: #13305c;
+  }
+
+  /* Nav flag visibility — show PAF by default, swap to Maine when active */
+  .nav-flag-maine { display: none; }
+  [data-region="maine"] .nav-flag-paf   { display: none; }
+  [data-region="maine"] .nav-flag-maine { display: block; }
+
+
+  /* ─── 2. RESET & BASE ───────────────────────────────────────────────── */
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    line-height: 1.7;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  img { max-width: 100%; height: auto; display: block; }
+  ul  { list-style: none; }
+  a   { color: inherit; text-decoration: none; }
+  h1, h2, h3 { font-family: 'DM Serif Display', serif; line-height: 1.2; }
+
+
+  /* ─── 3. UTILITIES ──────────────────────────────────────────────────── */
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .accent { color: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .badge-hot {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.3rem 0.75rem;
+    background: rgba(82, 183, 136, 0.1);
+    border: 1px solid var(--accent-dim);
+    border-radius: 2rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+
+
+  /* ─── 4. FLAGS & IDENTITY ────────────────────────────────────────────── */
+
+  /* Shared flag SVG styling */
+  .paf-flag svg, .maine-flag svg {
+    height: 18px;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    display: block;
+  }
+  .paf-flag svg   { width: 28px; }
+  .maine-flag svg { width: 28px; }
+
+  .paf-flag-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: default;
+  }
+
+  .paf-flag-wrap::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.4rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+
+  .paf-flag-wrap:hover::after { opacity: 1; }
+
+  /* Maine flag toggle button — sits beside the PAF flag in the hero.
+     Clicking it switches the site accent to coastal Maine blue.        */
+  #maine-toggle, #paf-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    border-radius: 3px;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+
+  #maine-toggle:hover, #paf-toggle:hover { transform: scale(1.08); }
+
+  /* Glow ring when the mode is active */
+  #maine-toggle.active svg,
+  #paf-toggle.active svg {
+    box-shadow: 0 0 0 2px var(--accent), 0 0 8px var(--accent);
+  }
+
+  /* Tooltips for both flag toggles */
+  #maine-toggle::after, #paf-toggle::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.4rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+
+  #maine-toggle:hover::after, #paf-toggle:hover::after { opacity: 1; }
+
+  /* ── Availability badge ─────────────────────────────────────────────────
+     The pulsing green dot signals "open to work" to anyone who visits.   */
+  .availability-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    background: rgba(82, 183, 136, 0.07);
+    border: 1px solid var(--accent-dim);
+    border-radius: 2rem;
+    padding: 0.38rem 0.9rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .pulse-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse-ring 2.2s ease-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%   { transform: translate(-50%,-50%) scale(1);   opacity: 0.75; }
+    100% { transform: translate(-50%,-50%) scale(2.8); opacity: 0;    }
+  }
+
+
+  /* ─── 5. NAVIGATION ─────────────────────────────────────────────────── */
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: 64px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-logo svg { width: 18px; height: 12px; border-radius: 1px; opacity: 0.9; }
+
+  .nav-links { display: flex; align-items: center; gap: 0.25rem; }
+
+  .nav-links a {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.4rem;
+    color: var(--text-secondary);
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text-primary); background: var(--bg-elevated); }
+
+  #theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    margin-left: 0.5rem;
+  }
+
+  #theme-toggle:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+
+  /* ─── 6. SECTIONS — SHARED ──────────────────────────────────────────── */
+
+  section { padding: 6rem 0; }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .section-title::after {
+    content: '';
+    display: block;
+    width: 40px; height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin-top: 0.5rem;
+  }
+
+  .section-subtitle { font-size: 1rem; color: var(--text-secondary); margin-bottom: 3rem; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+
+  /* ─── 7. HERO ───────────────────────────────────────────────────────── */
+
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  #hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(
+      to right,
+      var(--paf-red)   0%,    var(--paf-red)   33.33%,
+      var(--paf-black) 33.33%, var(--paf-black) 66.66%,
+      var(--paf-green) 66.66%, var(--paf-green) 100%
+    );
+    opacity: 0.65;
+  }
+
+  .hero-content { max-width: 700px; position: relative; z-index: 1; }
+
+  .hero-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-location::before { content: '▸'; font-size: 0.7rem; }
+
+  .hero-name {
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    font-style: italic;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 0.25rem;
+  }
+
+  .hero-tagline {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--text-secondary);
+    font-weight: 300;
+    margin-bottom: 1.75rem;
+  }
+
+  .hero-bio {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 560px;
+    margin-bottom: 2.25rem;
+  }
+
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: var(--accent-dim); border-color: var(--accent-dim); transform: translateY(-2px); }
+  .btn-outline { background: transparent; color: var(--text-primary); border-color: var(--border); }
+  .btn-outline:hover { background: var(--bg-elevated); transform: translateY(-2px); }
+
+
+  /* ─── 8. ABOUT ──────────────────────────────────────────────────────── */
+
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+
+  .about-text p { color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.8; }
+
+  .progress-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+  }
+
+  .progress-card h3 {
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+  }
+
+  .progress-item { margin-bottom: 1.25rem; }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+  }
+
+  .progress-bar { height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+
+  /* ─── 9. PROJECTS ───────────────────────────────────────────────────── */
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    cursor: default;
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-dim);
+    box-shadow: 0 8px 24px var(--shadow);
+  }
+
+  .project-icon { font-size: 1.75rem; margin-bottom: 1rem; }
+
+  .project-card h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .project-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem; }
+
+  .project-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .project-coming-soon {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    background: var(--bg-elevated);
+    color: var(--accent);
+    border: 1px solid var(--accent-dim);
+    border-radius: 2rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+
+
+  /* ─── 10. SKILLS ────────────────────────────────────────────────────── */
+
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; }
+
+  .skill-group h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem; font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+
+  /* ─── 11. GAMES SECTION ─────────────────────────────────────────────── */
+
+  #game { padding: 5rem 0; }
+
+  /* Vertical stack — Bat Cave on top, Theseus beneath */
+  .games-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .games-grid > div {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .game-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+  }
+
+  .game-wrapper {
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 8px 32px var(--shadow);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #bat-game {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    image-rendering: pixelated;
+  }
+
+  /* Taller to accommodate HUD + canvas + D-pad buttons */
+  #theseus-frame {
+    display: block;
+    width: 100%;
+    height: 810px;
+    border: none;
+    background: #0d0805;
+  }
+
+  .game-hint {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    padding: 0.55rem 1rem;
+    letter-spacing: 0.04em;
+  }
+
+
+  /* ─── 12. CONTACT ───────────────────────────────────────────────────── */
+
+  .contact-wrapper { display: grid; grid-template-columns: 1fr 1.4fr; gap: 3rem; align-items: start; }
+
+  .contact-info p { color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; }
+
+  .contact-detail { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; color: var(--text-secondary); font-size: 0.95rem; }
+
+  .contact-detail-icon {
+    width: 36px; height: 36px;
+    background: var(--bg-elevated);
+    border-radius: 0.4rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+
+  .community-block { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+  .community-block h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .community-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .community-links a {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .community-links a:hover { border-color: var(--accent-dim); color: var(--accent); }
+
+  .contact-form { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 0.75rem; padding: 2rem; }
+
+  .form-group { margin-bottom: 1.25rem; }
+
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.4rem; }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: var(--bg-page);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus { outline: none; border-color: var(--accent); }
+
+  .form-group textarea { height: 130px; resize: vertical; }
+
+  ::placeholder { color: var(--text-muted); }
+
+  .btn-submit { width: 100%; justify-content: center; padding: 0.85rem; font-size: 1rem; }
+
+  .form-success { display: none; text-align: center; padding: 2rem; color: var(--accent); font-size: 1.1rem; }
+
+  .form-success .success-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+
+  /* ─── 13. FOOTER ────────────────────────────────────────────────────── */
+
+  footer { padding: 2.5rem 0; border-top: 1px solid var(--border); text-align: center; font-size: 0.875rem; color: var(--text-muted); }
+  footer span { color: var(--accent); }
+
+
+  /* ─── 14. RESPONSIVE ────────────────────────────────────────────────── */
+
+  @media (max-width: 768px) {
+    .nav-links a:not(#theme-toggle) { display: none; }
+    .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .contact-wrapper { grid-template-columns: 1fr; gap: 2rem; }
+    section { padding: 4rem 0; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-cta { flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+  }
+
+</style>
+
+<body>
+
+  <!-- ── NAVIGATION ───────────────────────────────────────────────────── -->
+  <nav aria-label="Main navigation">
+    <div class="container nav-inner">
+
+      <a href="#" class="nav-logo" aria-label="Home">
+        <!-- PAF flag: visible in default mode -->
+        <svg class="nav-flag-paf" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="0" y="0"      width="30" height="6.67"  fill="#CC2936"/>
+          <rect x="0" y="6.67"  width="30" height="6.67"  fill="#1a1a1a"/>
+          <rect x="0" y="13.34" width="30" height="6.67"  fill="#009A44"/>
+        </svg>
+        <!-- Maine 1901 Pine Tree flag: visible in Maine mode -->
+        <svg class="nav-flag-maine" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="30" height="20" fill="#d4a55a"/>
+          <rect x="13.5" y="14.5" width="3" height="5" fill="#6b3f12"/>
+          <polygon points="5,15 25,15 15,8.5" fill="#2a5c18"/>
+          <polygon points="7.5,11 22.5,11 15,5.5" fill="#2a5c18"/>
+          <polygon points="10.5,7.5 19.5,7.5 15,2.5" fill="#2a5c18"/>
+          <polygon points="15,0.5 15.9,2.8 18.3,2.8 16.4,4.2 17.1,6.5 15,5.1 12.9,6.5 13.6,4.2 11.7,2.8 14.1,2.8" fill="#1a3a6b"/>
+        </svg>
+        S.
+      </a>
+
+      <div class="nav-links" role="list">
+        <a href="#about"    role="listitem">About</a>
+        <a href="#projects" role="listitem">Projects</a>
+        <a href="#skills"   role="listitem">Skills</a>
+        <a href="#game"     role="listitem">🎮 Games</a>
+        <a href="#contact"  role="listitem">Contact</a>
+        <!-- GitHub profile — opens in new tab -->
+        <a href="https://github.com/Shea31j" target="_blank" rel="noopener" role="listitem" title="GitHub" style="letter-spacing:0">⌥ GitHub</a>
+        <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">🌙</button>
+      </div>
+
+    </div>
+  </nav>
+
+
+  <!-- ── HERO ─────────────────────────────────────────────────────────── -->
+  <section id="hero">
+    <div class="container">
+      <div class="hero-content">
+
+        <!-- Pulsing availability badge — first thing employers see -->
+        <div class="availability-badge" aria-label="Open to work">
+          <span class="pulse-dot"></span>
+          Open to remote &amp; hybrid roles
+        </div>
+
+        <!-- Location + both flag toggles -->
+        <div class="hero-location">
+          Farmington, Maine
+
+          <!-- Pan-African flag — click to toggle dark / light mode -->
+          <button
+            id="paf-toggle"
+            data-tip="Pan-African flag 🖤"
+            aria-label="Pan-African flag — toggle dark/light mode"
+          >
+            <span class="paf-flag">
+              <svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="0"     width="60" height="13.33" fill="#CC2936"/>
+                <rect x="0" y="13.33" width="60" height="13.33" fill="#1a1a1a"/>
+                <rect x="0" y="26.66" width="60" height="13.34" fill="#009A44"/>
+              </svg>
+            </span>
+          </button>
+
+          <!-- 1901 Maine Pine Tree flag — click to toggle Maine accent mode -->
+          <button
+            id="maine-toggle"
+            data-tip="1901 Maine flag ♥"
+            aria-label="1901 Maine Pine Tree flag — toggle Maine color mode"
+          >
+            <span class="maine-flag">
+              <svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                <rect width="60" height="40" fill="#d4a55a"/>
+                <rect x="27" y="29" width="6" height="10" fill="#6b3f12"/>
+                <polygon points="10,30 50,30 30,17" fill="#2a5c18"/>
+                <polygon points="15,22 45,22 30,11" fill="#2a5c18"/>
+                <polygon points="21,15 39,15 30,5"  fill="#2a5c18"/>
+                <polygon points="30,1 31.8,5.5 36.5,5.5 32.8,8.3 34.2,13 30,10.2 25.8,13 27.2,8.3 23.5,5.5 28.2,5.5" fill="#1a3a6b"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <h1 class="hero-name">Hey, I'm <span class="accent">Shea.</span></h1>
+
+        <p class="hero-tagline">Python Developer · Data Background · Ready to Contribute</p>
+
+        <p class="hero-bio">
+          I bring something most junior developers don't: three years of hands-on
+          data work in a real government environment. As part of Maine DHHS's scan
+          team I process and classify high-volume health records under compliance
+          requirements — that's data integrity, document management, and regulated
+          workflows, not just theory. I'm now building the technical layer on top
+          of that foundation, 44% through Codecademy's CS career path, with Python,
+          data structures, Git, and a live project portfolio to show for it.
+        </p>
+
+        <div class="hero-cta">
+          <a href="#projects" class="btn btn-primary">See My Work →</a>
+          <a href="#contact"  class="btn btn-outline">Let's Talk</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── ABOUT ────────────────────────────────────────────────────────── -->
+  <section id="about">
+    <div class="container">
+
+      <h2 class="section-title reveal">About Me</h2>
+      <p class="section-subtitle reveal">The story so far</p>
+
+      <div class="about-grid">
+
+        <div class="about-text reveal">
+          <p>
+            I'm based in Farmington, Maine. For the past three years I've worked
+            on the scan team at Maine's Department of Health and Human Services,
+            where I process and index high volumes of incoming government health
+            documents — classifying records, maintaining data integrity, and
+            keeping workflows accurate under real compliance requirements.
+            That's closer to data management than most people realize, and it's
+            a big part of what drew me toward software.
+          </p>
+          <p>
+            Before DHHS my career covered a lot of ground: production work at a
+            wood pellet mill, patient care in a nursing home, and retail at
+            Hannaford. Each taught me something different about how organizations
+            run — and made me curious about the systems and software behind all
+            of it. Python was my entry point into that world, and it's still my
+            strongest language.
+          </p>
+          <p>
+            I'm part of a growing wave of Black developers reshaping what the
+            tech industry looks like. When I'm not coding, you'll find me on a
+            hiking trail, at the bowling alley, deep in a grand strategy game,
+            or working through my reading list.
+          </p>
+        </div>
+
+        <div class="reveal">
+          <div class="progress-card">
+            <h3>📚 Codecademy — CS Career Path &nbsp;<a href="https://www.codecademy.com/profiles/core5635590268" target="_blank" rel="noopener" style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--accent);border:1px solid var(--accent-dim);border-radius:2rem;padding:0.15rem 0.55rem;text-decoration:none;font-weight:500;">View profile →</a></h3>
+
+            <div class="progress-item">
+              <div class="progress-label"><span>Overall Progress</span><span class="accent">44%</span></div>
+              <div class="progress-bar"><div class="progress-fill" data-width="44"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Python</span><span class="accent">✓ Complete</span></div>
+              <div class="progress-bar"><div class="progress-fill" data-width="100"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Data Structures &amp; Algorithms</span><span class="accent">✓ Strong</span></div>
+              <div class="progress-bar"><div class="progress-fill" data-width="85"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>Git &amp; Command Line</span><span class="accent">✓ Complete</span></div>
+              <div class="progress-bar"><div class="progress-fill" data-width="100"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-label"><span>What's next...</span><span>In Progress</span></div>
+              <div class="progress-bar"><div class="progress-fill" data-width="20"></div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── PROJECTS ──────────────────────────────────────────────────────── -->
+  <section id="projects">
+    <div class="container">
+
+      <h2 class="section-title reveal">Projects</h2>
+      <p class="section-subtitle reveal">Things I've built while learning</p>
+
+      <div class="projects-grid">
+
+        <div class="project-card reveal">
+          <div class="project-icon">🐍</div>
+          <span class="project-coming-soon">LIVE ON GITHUB</span>
+          <h3>Terminal Tic-Tac-Toe</h3>
+          <p>My first completed Python project — a fully playable two-player Tic-Tac-Toe game that runs in the terminal. Built with logic for win detection, draw conditions, and input validation from scratch.</p>
+          <div class="project-tags">
+            <span class="badge">Python</span>
+            <span class="badge">CLI</span>
+            <span class="badge">Game Logic</span>
+          </div>
+          <a href="https://github.com/Shea31j/python-tic-tac-toe-game" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;margin-top:1rem;font-size:0.82rem;font-family:'DM Mono',monospace;color:var(--accent);text-decoration:none;border:1px solid var(--accent-dim);border-radius:2rem;padding:0.25rem 0.7rem;transition:all 0.2s;" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">View on GitHub →</a>
+        </div>
+
+        <div class="project-card reveal">
+          <div class="project-icon">🦇</div>
+          <span class="project-coming-soon">LIVE ON THIS PAGE</span>
+          <h3>Bat Cave Game</h3>
+          <p>A sewer-themed Flappy Bird clone built with vanilla JavaScript and the HTML5 Canvas API. Features a 3-layer parallax background, a bat with wing animation, and high score tracking.</p>
+          <div class="project-tags">
+            <span class="badge">JavaScript</span>
+            <span class="badge">Canvas API</span>
+            <span class="badge">Game Dev</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal">
+          <div class="project-icon">⚔</div>
+          <span class="project-coming-soon">LIVE ON THIS PAGE</span>
+          <h3>Theseus &amp; the Minotaur</h3>
+          <p>A Pac-Man-style labyrinth game. Navigate the maze as Theseus, collect potions to become invulnerable, slay ghost-guards, and defeat the Minotaur before your lives run out.</p>
+          <div class="project-tags">
+            <span class="badge">JavaScript</span>
+            <span class="badge">Canvas API</span>
+            <span class="badge">Game Dev</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal">
+          <div class="project-icon">💻</div>
+          <span class="project-coming-soon">IN PROGRESS</span>
+          <h3>This Portfolio</h3>
+          <p>A responsive single-page portfolio with dark mode, scroll animations, a playable game, and a contact form — built with vanilla HTML, CSS, and JavaScript.</p>
+          <div class="project-tags">
+            <span class="badge">HTML</span>
+            <span class="badge">CSS</span>
+            <span class="badge">JavaScript</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── SKILLS ────────────────────────────────────────────────────────── -->
+  <section id="skills">
+    <div class="container">
+
+      <h2 class="section-title reveal">Skills</h2>
+      <p class="section-subtitle reveal">Technical skills, professional background, and where I'm heading</p>
+
+      <div class="skills-grid">
+
+        <div class="skill-group reveal">
+          <h3>Languages</h3>
+          <div class="skill-tags">
+            <span class="badge">Python</span>
+            <span class="badge">HTML</span>
+            <span class="badge">CSS</span>
+            <span class="badge">JavaScript</span>
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+          <h3>CS Concepts</h3>
+          <div class="skill-tags">
+            <span class="badge">Data Structures</span>
+            <span class="badge">Algorithms</span>
+            <span class="badge">Big O</span>
+            <span class="badge">Recursion</span>
+            <span class="badge">OOP</span>
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+          <h3>Tools</h3>
+          <div class="skill-tags">
+            <span class="badge">Git</span>
+            <span class="badge">GitHub</span>
+            <span class="badge">Command Line</span>
+            <span class="badge">VS Code</span>
+          </div>
+        </div>
+
+        <!--
+          Professional Background group — these are real, transferable skills
+          from 3 years at DHHS. Framed in tech-adjacent language so a recruiter
+          reading the skills section understands the context immediately.
+        -->
+        <div class="skill-group reveal">
+          <h3>Professional Background</h3>
+          <div class="skill-tags">
+            <span class="badge">Document Classification</span>
+            <span class="badge">Records Management</span>
+            <span class="badge">Data Accuracy</span>
+            <span class="badge">Compliance-Aware Workflows</span>
+            <span class="badge">High-Volume Processing</span>
+            <span class="badge">Government Systems</span>
+          </div>
+        </div>
+
+        <div class="skill-group reveal">
+          <h3>High-Demand Targets ↗</h3>
+          <div class="skill-tags">
+            <span class="badge-hot">SQL / PostgreSQL</span>
+            <span class="badge-hot">pandas</span>
+            <span class="badge-hot">AWS Cloud</span>
+            <span class="badge-hot">FastAPI</span>
+            <span class="badge-hot">React</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── GAMES ───────────────────────────────────────────────────────────── -->
+  <section id="game">
+    <div class="container">
+
+      <h2 class="section-title reveal">Mini Games</h2>
+      <p class="section-subtitle reveal">Two playable games built with the HTML5 Canvas API</p>
+
+      <div class="games-grid">
+
+        <!-- Bat Cave -->
+        <div class="reveal">
+          <p class="game-label">🦇 Bat Cave — Flappy Bat</p>
+          <div class="game-wrapper" role="application" aria-label="Bat Cave — click to play">
+            <canvas id="bat-game"></canvas>
+            <div class="game-hint">click or tap to flap &nbsp;·&nbsp; avoid the pipes</div>
+          </div>
+        </div>
+
+        <!-- Theseus & the Minotaur -->
+        <div class="reveal">
+          <p class="game-label">⚔ Theseus &amp; the Minotaur — Labyrinth</p>
+          <div class="game-wrapper" role="application" aria-label="Theseus Labyrinth — click to start">
+            <iframe id="theseus-frame" title="Theseus and the Minotaur game"></iframe>
+            <div class="game-hint">click to start &nbsp;·&nbsp; ← ↑ → ↓ to move &nbsp;·&nbsp; grab potions to fight back</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── CONTACT ───────────────────────────────────────────────────────── -->
+  <section id="contact">
+    <div class="container">
+
+      <h2 class="section-title reveal">Get In Touch</h2>
+      <p class="section-subtitle reveal">I'd love to connect</p>
+
+      <div class="contact-wrapper">
+
+        <div class="contact-info reveal">
+          <p>I'm actively seeking remote and hybrid roles in IT, data, and software development. If you need someone who brings real data-processing experience, strong Python fundamentals, and a genuine drive to grow — that's exactly what I offer.</p>
+
+          <div class="contact-detail">
+            <div class="contact-detail-icon">📍</div>
+            <span>Farmington, Maine — Remote & Hybrid Ready</span>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">💼</div>
+            <span>Actively seeking IT, Data &amp; Dev roles</span>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">🗂️</div>
+            <span>3 yrs · Records Management &amp; Data Classification, Maine DHHS</span>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-detail-icon">🎓</div>
+            <span>Codecademy CS Career Path — 44% complete</span>
+          </div>
+
+          <div class="community-block">
+            <h4>Find Me Online</h4>
+            <div class="community-links">
+              <a href="https://github.com/Shea31j"                             target="_blank" rel="noopener">GitHub</a>
+              <a href="https://www.codecademy.com/profiles/core5635590268"     target="_blank" rel="noopener">Codecademy</a>
+              <a href="https://www.nsbe.org"                                   target="_blank" rel="noopener">NSBE</a>
+              <a href="https://blacktechpipeline.com"                          target="_blank" rel="noopener">Black Tech Pipeline</a>
+              <a href="https://afrotech.com"                                   target="_blank" rel="noopener">AfroTech</a>
+              <a href="https://codepath.org"                                   target="_blank" rel="noopener">CodePath</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <div class="contact-form">
+            <form id="contact-form" novalidate>
+              <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text"  id="name"    name="name"    placeholder="Jane Smith"          required />
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email"   name="email"   placeholder="jane@example.com"    required />
+              </div>
+              <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text"  id="subject" name="subject" placeholder="Just wanted to say hi!" />
+              </div>
+              <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="Your message here..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-submit">Send Message →</button>
+            </form>
+
+            <div class="form-success" id="form-success">
+              <div class="success-icon">✅</div>
+              <strong>Your email client should have opened!</strong>
+              <p style="color:var(--text-secondary); margin-top:0.5rem; font-size:0.95rem;">
+                Just hit <strong>Send</strong> in your email app and the message
+                will go straight to Shea. Didn't open automatically?
+                You can also reach me directly at
+                <a href="mailto:srjusticejr@gmail.com" style="color:var(--accent);">srjusticejr@gmail.com</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <p>
+        Built with <span>♥</span> by Shea &nbsp;·&nbsp;
+        Farmington, Maine &nbsp;·&nbsp;
+        <span>44%</span> and climbing 🚀
+      </p>
+    </div>
+  </footer>
+
+
+<script>
+
+/* ════════════════════════════════════════════════════════════════════
+   A) PORTFOLIO JAVASCRIPT
+   ════════════════════════════════════════════════════════════════════ */
+
+const htmlEl = document.documentElement;
+
+// ── Dark / light mode — moon/sun button only ──────────────────────────────
+const toggleBtn = document.getElementById('theme-toggle');
+
+function applyTheme(theme) {
+  htmlEl.setAttribute('data-theme', theme);
+  if (toggleBtn) toggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('theme', theme);
+}
+
+applyTheme(localStorage.getItem('theme') || 'dark');
+
+if (toggleBtn) toggleBtn.addEventListener('click', () => {
+  applyTheme(htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+
+// ── Flag mode — PAF flag vs Maine flag (mutually exclusive) ───────────────
+//
+// The two flags act like radio buttons:
+//   Click PAF flag  → PAF mode  (original forest-green accent, PAF nav flag)
+//   Click Maine flag → Maine mode (coastal-blue accent, pine-tree nav flag)
+//
+// Whichever is active gets the glowing ring. PAF is the default.
+
+const pafToggle = document.getElementById('paf-toggle');
+const maineBtn  = document.getElementById('maine-toggle');
+
+function applyRegion(maine) {
+  if (maine) {
+    // ── Maine mode ──
+    htmlEl.setAttribute('data-region', 'maine');
+    if (maineBtn)  maineBtn.classList.add('active');
+    if (pafToggle) pafToggle.classList.remove('active');
+    localStorage.setItem('region', 'maine');
+  } else {
+    // ── PAF / default mode ──
+    htmlEl.removeAttribute('data-region');
+    if (pafToggle) pafToggle.classList.add('active');
+    if (maineBtn)  maineBtn.classList.remove('active');
+    localStorage.removeItem('region');
+  }
+}
+
+// Restore saved preference (default: PAF mode)
+applyRegion(localStorage.getItem('region') === 'maine');
+
+if (pafToggle) pafToggle.addEventListener('click', () => applyRegion(false));
+if (maineBtn)  maineBtn.addEventListener('click',  () => applyRegion(true));
+
+
+// ── Theseus & the Minotaur — inject game into iframe via Blob URL ─────────
+// Using a Blob avoids all HTML-escaping issues and fully isolates the game's
+// styles and JS from the portfolio. The only changes to the original game:
+//   1. Click on the canvas starts / restarts (arrow keys still move Theseus)
+//   2. Overlay text updated to say "Click to Enter" / "Click to Try Again"
+//   3. Bottom message updated to match click-to-start
+
+(function () {
+  const gameHTML = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{display:flex;flex-direction:column;align-items:center;font-family:Georgia,serif;color:#f5c542;background:#0d0805;outline:none}
+#hud{display:flex;gap:20px;align-items:center;padding:6px 12px;font-size:13px;letter-spacing:.5px;flex-wrap:wrap;justify-content:center}
+canvas{display:block;cursor:pointer}
+#pbar-wrap{width:494px;height:5px;background:#1e1e1e;display:none;margin-top:2px}
+#pbar{height:100%;background:linear-gradient(90deg,#7c3aed,#c084fc);width:100%}
+#msg{padding:5px;font-size:13px;min-height:24px;color:#c9a87c;text-align:center}
+#dpad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px);gap:6px;margin:10px auto 6px;width:fit-content}
+.db{background:#1a2a3a;border:1.5px solid #2a4a6a;border-radius:10px;color:#f5c542;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;user-select:none;touch-action:manipulation;transition:background .1s}
+.db:active{background:#2e5080}
+.dc{background:#111827;border-radius:8px}
+</style>
+</head>
+<body>
+<div id="hud" tabindex="-1">
+  <span>⚔ SCORE: <b id="sc">0</b></span>
+  <span>LIVES: <span id="lv">♦♦♦</span></span>
+  <span>MINOTAUR: <span id="mhp">♥♥</span></span>
+  <span id="pwr-lbl" style="color:#c084fc;display:none">✦ POTION!</span>
+</div>
+<canvas id="gc" tabindex="0"></canvas>
+<div id="pbar-wrap"><div id="pbar"></div></div>
+<div id="msg">Click the labyrinth to begin — then use ← ↑ → ↓ or the buttons below</div>
+<div id="dpad">
+  <div class="dc"></div>
+  <button class="db" id="bu">↑</button>
+  <div class="dc"></div>
+  <button class="db" id="bl">←</button>
+  <div class="dc"></div>
+  <button class="db" id="br">→</button>
+  <div class="dc"></div>
+  <button class="db" id="bd">↓</button>
+  <div class="dc"></div>
+</div>
+<script>
+const gc=document.getElementById('gc');
+const ctx=gc.getContext('2d');
+const T=26,COLS=19,ROWS=21;
+gc.width=COLS*T;gc.height=ROWS*T;
+
+const WL=0,CO=1,EM=2,PO=3,PE=4;
+const GXIT_C=9,GXIT_R=7,GHOME_C=9,GHOME_R=9;
+
+const OMAP=[
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+  [0,3,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,3,0],
+  [0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0],
+  [0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,0],
+  [0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0],
+  [0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0],
+  [0,1,1,1,1,1,1,0,0,2,0,0,1,1,1,1,1,1,0],
+  [0,0,0,0,1,0,1,0,4,4,4,0,1,0,1,0,0,0,0],
+  [0,0,0,0,1,0,0,0,4,4,4,0,0,0,0,1,0,0,0],
+  [0,0,0,0,1,0,1,0,4,4,4,0,1,0,1,0,0,0,0],
+  [0,1,1,1,1,1,1,0,0,2,0,0,1,1,1,1,1,1,0],
+  [0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0],
+  [0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0],
+  [0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,0],
+  [0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0],
+  [0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,1,0],
+  [0,3,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,3,0],
+  [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+  [0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+];
+
+let map,totalCoins;
+let gs='start';
+let score=0,powerTimer=0,flashClock=0,deadTimer=0,lastTime=0,hudClock=0;
+
+const P={col:9,row:18,dx:0,dy:0,ndx:0,ndy:0,prog:0,lives:3,hitCd:0};
+const GC=['#FF4444','#FF9900','#FF69B4'];
+let GS;
+const M={col:1,row:1,dx:1,dy:0,prog:0,health:2,state:'active',respawnTimer:0,hitFlash:0,hitCd:0};
+
+function initGame(){
+  score=0;P.lives=3;
+  map=OMAP.map(r=>[...r]);
+  totalCoins=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+    if(map[r][c]===CO||map[r][c]===PO)totalCoins++;
+  resetPositions();
+  powerTimer=0;flashClock=0;
+  hud();
+}
+
+function resetPositions(){
+  Object.assign(P,{col:9,row:18,dx:0,dy:0,ndx:0,ndy:0,prog:0,hitCd:0});
+  GS=[
+    {col:8,row:9,dx:0,dy:0,prog:0,state:'pen',penTimer:2,  speed:2.8,color:GC[0]},
+    {col:9,row:9,dx:0,dy:0,prog:0,state:'pen',penTimer:5,  speed:2.8,color:GC[1]},
+    {col:10,row:9,dx:0,dy:0,prog:0,state:'pen',penTimer:8.5,speed:2.8,color:GC[2]},
+  ];
+  Object.assign(M,{col:1,row:1,dx:1,dy:0,prog:0,health:2,state:'active',respawnTimer:0,hitFlash:0,hitCd:0});
+  powerTimer=0;
+}
+
+function cellAt(c,r){if(c<0||c>=COLS||r<0||r>=ROWS)return WL;return map[r][c];}
+function origAt(c,r){if(c<0||c>=COLS||r<0||r>=ROWS)return WL;return OMAP[r][c];}
+function pass(c,r,pen=false){const t=cellAt(c,r);return t!==WL&&(t!==PE||pen);}
+
+const DIRS=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+
+function randDir(e,pen){
+  const bx=-e.dx,by=-e.dy;
+  const v=DIRS.filter(d=>(d.dx!==bx||d.dy!==by)&&pass(e.col+d.dx,e.row+d.dy,pen));
+  if(!v.length){if(pass(e.col+bx,e.row+by,pen)){e.dx=bx;e.dy=by;}return;}
+  const d=v[~~(Math.random()*v.length)];e.dx=d.dx;e.dy=d.dy;
+}
+
+function greedyDir(e,tc,tr,pen){
+  const dc=tc-e.col,dr=tr-e.row;
+  const p=[];
+  if(Math.abs(dc)>=Math.abs(dr)){if(dc)p.push({dx:Math.sign(dc),dy:0});if(dr)p.push({dx:0,dy:Math.sign(dr)});}
+  else{if(dr)p.push({dx:0,dy:Math.sign(dr)});if(dc)p.push({dx:Math.sign(dc),dy:0});}
+  for(const d of DIRS)if(!p.find(x=>x.dx===d.dx&&x.dy===d.dy))p.push(d);
+  const bx=-e.dx,by=-e.dy;
+  for(const nut of[false,true])
+    for(const d of p){
+      if(!nut&&d.dx===bx&&d.dy===by)continue;
+      if(pass(e.col+d.dx,e.row+d.dy,pen)){e.dx=d.dx;e.dy=d.dy;return;}
+    }
+}
+
+function updateGhost(g,dt){
+  if(g.state==='pen'){
+    g.penTimer-=dt;
+    if(g.penTimer<=0){g.state='exiting';greedyDir(g,GXIT_C,GXIT_R,true);}
+    return;
+  }
+  const spd=g.state==='eaten'?7:g.state==='vulnerable'?1.4:2.8;
+  if(g.dx===0&&g.dy===0){
+    if(g.state==='exiting')greedyDir(g,GXIT_C,GXIT_R,true);
+    else if(g.state==='eaten'){
+      if(g.col===GXIT_C&&g.row===GXIT_R){g.dy=1;}
+      else greedyDir(g,GXIT_C,GXIT_R,true);
+    }else randDir(g,false);
+    if(g.dx===0&&g.dy===0)return;
+  }
+  g.prog+=dt*spd;
+  if(g.prog>=1){
+    g.col+=g.dx;g.row+=g.dy;g.prog=0;g.dx=0;g.dy=0;
+    if(g.state==='exiting'&&g.col===GXIT_C&&g.row===GXIT_R){g.state='active';}
+    else if(g.state==='eaten'){
+      if(g.col===GXIT_C&&g.row===GXIT_R){g.dy=1;}
+      else if(g.col===GHOME_C&&g.row===GHOME_R){g.state='pen';g.penTimer=4;}
+    }
+  }
+}
+
+function updatePlayer(dt){
+  if(P.hitCd>0)P.hitCd-=dt;
+  if(P.dx===0&&P.dy===0){
+    if((P.ndx||P.ndy)&&pass(P.col+P.ndx,P.row+P.ndy))
+      {P.dx=P.ndx;P.dy=P.ndy;}
+    return;
+  }
+  P.prog+=dt*4.5;
+  if(P.prog>=1){
+    const adx=P.dx,ady=P.dy;
+    P.col+=adx;P.row+=ady;P.prog=0;P.dx=0;P.dy=0;
+    const c=map[P.row][P.col];
+    if(c===CO){map[P.row][P.col]=EM;score+=10;totalCoins--;hud();}
+    else if(c===PO){
+      map[P.row][P.col]=EM;totalCoins--;
+      powerTimer=10;
+      GS.forEach(g=>{if(g.state==='active')g.state='vulnerable';});
+      hud();
+    }
+    if(totalCoins<=0){gs='win';hud();return;}
+    if((P.ndx||P.ndy)&&pass(P.col+P.ndx,P.row+P.ndy)){P.dx=P.ndx;P.dy=P.ndy;}
+    else if(pass(P.col+adx,P.row+ady)){P.dx=adx;P.dy=ady;}
+  }
+}
+
+function updateMino(dt){
+  if(M.state==='respawning'){
+    M.respawnTimer-=dt;
+    if(M.respawnTimer<=0)Object.assign(M,{col:1,row:1,dx:1,dy:0,prog:0,health:2,state:'active',hitFlash:0,hitCd:0});
+    return;
+  }
+  if(M.hitFlash>0)M.hitFlash-=dt;
+  if(M.hitCd>0)M.hitCd-=dt;
+  if(M.dx===0&&M.dy===0){greedyDir(M,P.col,P.row,false);return;}
+  M.prog+=dt*3.2;
+  if(M.prog>=1){
+    M.col+=M.dx;M.row+=M.dy;M.prog=0;M.dx=0;M.dy=0;
+    greedyDir(M,P.col,P.row,false);
+  }
+}
+
+function updatePower(dt){
+  if(powerTimer>0){
+    powerTimer-=dt;
+    flashClock=(flashClock+dt)%0.5;
+    if(powerTimer<=0){powerTimer=0;GS.forEach(g=>{if(g.state==='vulnerable')g.state='active';});}
+    const pb=document.getElementById('pbar');
+    const pw=document.getElementById('pbar-wrap');
+    const pl=document.getElementById('pwr-lbl');
+    if(pb)pb.style.width=(Math.max(0,powerTimer)/10*100)+'%';
+    if(pw)pw.style.display='';
+    if(pl)pl.style.display='';
+  }else{
+    const pw=document.getElementById('pbar-wrap');
+    const pl=document.getElementById('pwr-lbl');
+    if(pw)pw.style.display='none';
+    if(pl)pl.style.display='none';
+  }
+}
+
+function epx(e){return(e.col+e.dx*e.prog)*T+T/2;}
+function epy(e){return(e.row+e.dy*e.prog)*T+T/2;}
+
+function checkColl(){
+  if(P.hitCd>0)return;
+  for(const g of GS){
+    if(g.state==='pen'||g.state==='eaten')continue;
+    const d=Math.hypot(epx(P)-epx(g),epy(P)-epy(g));
+    if(d<T*0.65){
+      if(powerTimer>0&&g.state==='vulnerable'){
+        g.state='eaten';g.dx=0;g.dy=0;g.prog=0;
+        score+=200;hud();P.hitCd=0.3;
+      }else if(g.state==='active'){playerHit();return;}
+    }
+  }
+  if(M.state==='active'){
+    const d=Math.hypot(epx(P)-epx(M),epy(P)-epy(M));
+    if(d<T*0.78){
+      if(powerTimer>0&&M.hitCd<=0){
+        M.health--;M.hitFlash=0.4;M.hitCd=1.5;P.hitCd=0.5;score+=150;
+        if(M.health<=0){M.state='respawning';M.respawnTimer=15;score+=450;}
+        hud();
+      }else if(powerTimer<=0){playerHit();}
+    }
+  }
+}
+
+function playerHit(){
+  P.lives--;hud();
+  if(P.lives<=0){gs='gameover';return;}
+  gs='dead';deadTimer=1.8;P.dx=0;P.dy=0;P.hitCd=999;
+}
+
+function hud(){
+  document.getElementById('sc').textContent=score;
+  const lv=document.getElementById('lv');
+  if(lv)lv.textContent=P.lives>0?'♦'.repeat(P.lives):'☠';
+  const mh=document.getElementById('mhp');
+  if(mh){
+    if(M.state==='respawning')mh.textContent='💀 '+(M.respawnTimer|0)+'s';
+    else mh.textContent='♥'.repeat(Math.max(0,M.health));
+  }
+}
+
+function rrect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+function drawMaze(){
+  for(let row=0;row<ROWS;row++){
+    for(let col=0;col<COLS;col++){
+      const c=map[row][col],ox=col*T,oy=row*T,cx=ox+T/2,cy=oy+T/2;
+      if(c===WL){
+        ctx.fillStyle='#1c2d48';ctx.fillRect(ox,oy,T,T);
+        ctx.fillStyle='#263f62';rrect(ox+2,oy+2,T-4,T-4,2);ctx.fill();
+        ctx.fillStyle='#152036';rrect(ox+4,oy+4,T-8,T-8,2);ctx.fill();
+      }else{
+        ctx.fillStyle=c===PE?'#160d28':'#0d0805';
+        ctx.fillRect(ox,oy,T,T);
+        if(c===CO){
+          ctx.fillStyle='#f5c542';
+          ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fill();
+        }else if(c===PO){
+          ctx.save();ctx.shadowBlur=9;ctx.shadowColor='#a855f7';
+          ctx.fillStyle='#9333ea';
+          ctx.beginPath();ctx.arc(cx,cy,T*0.27,0,Math.PI*2);ctx.fill();
+          ctx.shadowBlur=0;
+          ctx.fillStyle='rgba(255,255,255,0.5)';
+          ctx.beginPath();ctx.arc(cx-4,cy-4,T*0.09,0,Math.PI*2);ctx.fill();
+          ctx.restore();
+        }else if(c===EM&&origAt(col,row)===EM){
+          ctx.fillStyle='rgba(147,51,234,0.12)';ctx.fillRect(ox,oy,T,T);
+        }
+      }
+    }
+  }
+}
+
+function drawGhost(g){
+  const gx=epx(g),gy=epy(g),r=T*0.4;
+  if(g.state==='pen'){ctx.globalAlpha=0.6;}
+  if(g.state==='eaten'){
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.arc(gx-r*0.3,gy,r*0.18,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(gx+r*0.3,gy,r*0.18,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2244cc';
+    ctx.beginPath();ctx.arc(gx-r*0.3,gy,r*0.09,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(gx+r*0.3,gy,r*0.09,0,Math.PI*2);ctx.fill();
+    return;
+  }
+  let col=g.color;
+  if(g.state==='vulnerable'){
+    if(powerTimer<2.5&&flashClock<0.25)col='#fff';
+    else col='#2244cc';
+  }
+  ctx.save();
+  ctx.fillStyle=col;
+  ctx.beginPath();
+  ctx.arc(gx,gy-r*0.15,r,Math.PI,0,true);
+  const by=gy+r*0.85,ww=2*r/3;
+  ctx.lineTo(gx+r,by);
+  for(let i=0;i<3;i++){
+    ctx.quadraticCurveTo(gx+r-ww*(i+.5),by+(i%2===0?r*.3:-r*.3),gx+r-ww*(i+1),by);
+  }
+  ctx.closePath();ctx.fill();
+  if(g.state!=='vulnerable'){
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.arc(gx-r*.3,gy-r*.25,r*.19,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(gx+r*.3,gy-r*.25,r*.19,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#112288';
+    ctx.beginPath();ctx.arc(gx-r*.3,gy-r*.25,r*.1,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(gx+r*.3,gy-r*.25,r*.1,0,Math.PI*2);ctx.fill();
+  }else{
+    ctx.fillStyle='#99bbff';
+    ctx.beginPath();ctx.arc(gx-r*.3,gy-r*.25,r*.12,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(gx+r*.3,gy-r*.25,r*.12,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#99bbff';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(gx,gy+r*.05,r*.28,.1*Math.PI,.9*Math.PI);ctx.stroke();
+  }
+  ctx.restore();
+  ctx.globalAlpha=1;
+}
+
+function drawTheseus(){
+  const px=epx(P),py=epy(P),r=T*0.38;
+  ctx.save();
+  if(powerTimer>0){ctx.shadowBlur=14;ctx.shadowColor='#fbbf24';}
+  ctx.fillStyle=powerTimer>0?'#93c5fd':'#2563eb';
+  ctx.beginPath();ctx.arc(px,py,r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#f59e0b';
+  ctx.beginPath();ctx.ellipse(px,py-r*.58,r*.28,r*.4,0,Math.PI,0);ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(px-r*.28,py-r*.18,r*.14,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px+r*.28,py-r*.18,r*.14,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#111';
+  ctx.beginPath();ctx.arc(px-r*.27,py-r*.17,r*.07,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px+r*.27,py-r*.17,r*.07,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+function drawMino(){
+  if(M.state==='respawning')return;
+  const mx=epx(M),my=epy(M),r=T*0.46;
+  ctx.save();
+  ctx.shadowBlur=8;ctx.shadowColor='#991b1b';
+  ctx.fillStyle='#3d1a00';
+  ctx.beginPath();
+  ctx.moveTo(mx-r*.35,my-r*.65);
+  ctx.bezierCurveTo(mx-r*.85,my-r*1.45,mx-r*1.1,my-r*.8,mx-r*.6,my-r*.55);
+  ctx.closePath();ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(mx+r*.35,my-r*.65);
+  ctx.bezierCurveTo(mx+r*.85,my-r*1.45,mx+r*1.1,my-r*.8,mx+r*.6,my-r*.55);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=M.hitFlash>0?'#ef4444':'#7f1d1d';
+  ctx.beginPath();ctx.arc(mx,my,r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#5c1313';
+  ctx.beginPath();ctx.ellipse(mx,my+r*.18,r*.44,r*.3,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#2a0000';
+  ctx.beginPath();ctx.arc(mx-r*.19,my+r*.2,r*.09,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(mx+r*.19,my+r*.2,r*.09,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fbbf24';
+  ctx.beginPath();ctx.arc(mx-r*.33,my-r*.1,r*.16,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(mx+r*.33,my-r*.1,r*.16,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#000';
+  ctx.beginPath();ctx.arc(mx-r*.33,my-r*.1,r*.08,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(mx+r*.33,my-r*.1,r*.08,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#c0392b';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(mx-r*.52,my-r*.3);ctx.lineTo(mx-r*.14,my-r*.25);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(mx+r*.52,my-r*.3);ctx.lineTo(mx+r*.14,my-r*.25);ctx.stroke();
+  ctx.restore();
+}
+
+function drawOverlay(t1,t2){
+  ctx.fillStyle='rgba(0,0,0,0.78)';ctx.fillRect(0,0,gc.width,gc.height);
+  ctx.textAlign='center';
+  ctx.fillStyle='#f5c542';ctx.font='bold 25px Georgia,serif';
+  ctx.fillText(t1,gc.width/2,gc.height/2-16);
+  if(t2){ctx.fillStyle='#c9a87c';ctx.font='14px Georgia,serif';ctx.fillText(t2,gc.width/2,gc.height/2+14);}
+}
+
+function render(){
+  ctx.fillStyle='#0d0805';ctx.fillRect(0,0,gc.width,gc.height);
+  drawMaze();
+  GS.forEach(drawGhost);
+  drawTheseus();
+  drawMino();
+  if(gs==='start'){drawOverlay('LABYRINTH OF THESEUS','Click to Enter the Labyrinth');}
+  else if(gs==='dead'){
+    if(Math.floor(deadTimer*8)%2===0){ctx.fillStyle='rgba(220,30,30,0.25)';ctx.fillRect(0,0,gc.width,gc.height);}
+  }else if(gs==='gameover'){drawOverlay('THESEUS HAS FALLEN','Score: '+score+'  \u2014  Click to Try Again');}
+  else if(gs==='win'){drawOverlay('LABYRINTH CONQUERED!','Score: '+score+'  \u2014  Click to Play Again');}
+}
+
+function update(dt){
+  hudClock+=dt;
+  if(hudClock>0.5){hudClock=0;hud();}
+  if(gs==='dead'){
+    deadTimer-=dt;
+    if(deadTimer<=0){resetPositions();gs='playing';}
+    return;
+  }
+  if(gs!=='playing')return;
+  updatePower(dt);
+  updatePlayer(dt);
+  GS.forEach(g=>updateGhost(g,dt));
+  updateMino(dt);
+  checkColl();
+}
+
+function loop(ts){
+  const dt=Math.min((ts-lastTime)/1000,0.05);lastTime=ts;
+  update(dt);render();
+  requestAnimationFrame(loop);
+}
+
+// Arrow keys move Theseus during play (unchanged from original)
+document.addEventListener('keydown',e=>{
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];
+  if(!d)return;
+  e.preventDefault();
+  if(gs==='gameover'||gs==='win'){score=0;P.lives=3;gs='playing';initGame();return;}
+  if(gs==='start'){gs='playing';initGame();return;}
+  P.ndx=d[0];P.ndy=d[1];
+  if(gs==='playing'&&P.dx===0&&P.dy===0&&pass(P.col+P.ndx,P.row+P.ndy))
+    {P.dx=P.ndx;P.dy=P.ndy;}
+},{passive:false});
+
+// Click to start / restart (the key change from the original)
+gc.addEventListener('click',()=>{
+  gc.focus();
+  if(gs==='start'){gs='playing';initGame();}
+  else if(gs==='gameover'||gs==='win'){score=0;P.lives=3;gs='playing';initGame();}
+});
+
+// D-pad buttons — mobile friendly controls, same logic as arrow keys
+function moveDir(dx,dy){
+  if(gs==='start'){gs='playing';initGame();return;}
+  if(gs==='gameover'||gs==='win'){score=0;P.lives=3;gs='playing';initGame();return;}
+  if(gs!=='playing')return;
+  P.ndx=dx;P.ndy=dy;
+  if(P.dx===0&&P.dy===0&&pass(P.col+dx,P.row+dy)){P.dx=dx;P.dy=dy;}
+}
+// [up, left, right, down] matching button IDs bu bl br bd
+[['bu',0,-1],['bl',-1,0],['br',1,0],['bd',0,1]].forEach(([id,dx,dy])=>{
+  const el=document.getElementById(id);
+  if(!el)return;
+  const go=()=>moveDir(dx,dy);
+  el.addEventListener('click',go);
+  el.addEventListener('touchstart',e=>{e.preventDefault();go();},{passive:false});
+});
+
+initGame();hud();
+lastTime=performance.now();
+requestAnimationFrame(loop);
+<\/script>
+</body>
+</html>`;
+
+  const frame = document.getElementById('theseus-frame');
+  if (frame) {
+    const blob = new Blob([gameHTML], { type: 'text/html' });
+    frame.src = URL.createObjectURL(blob);
+  }
+})();
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+        animateProgressBars(entry.target);
+      }
+    });
+  },
+  { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+);
+
+document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+
+
+// ── Progress bar animations ───────────────────────────────────────────────
+function animateProgressBars(container) {
+  container.querySelectorAll('.progress-fill').forEach((fill) => {
+    const target = fill.getAttribute('data-width');
+    if (target) setTimeout(() => { fill.style.width = target + '%'; }, 200);
+  });
+}
+
+
+// ── Contact form → mailto ─────────────────────────────────────────────────
+// Builds a pre-filled mailto: link so messages land in srjusticejr@gmail.com.
+// No backend or API key required — the visitor's own email client sends it.
+
+const contactForm = document.getElementById('contact-form');
+const formSuccess = document.getElementById('form-success');
+
+contactForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const name    = document.getElementById('name').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const subject = document.getElementById('subject').value.trim()
+                  || 'Message from sheajustice.net';
+  const message = document.getElementById('message').value.trim();
+
+  if (!name || !email || !message) {
+    alert('Please fill in your name, email, and message.');
+    return;
+  }
+
+  // Pre-fill the email body with the visitor's details
+  const body = `Name: ${name}\nFrom: ${email}\n\n${message}`;
+
+  // Open the visitor's mail client with everything filled in
+  window.location.href =
+    `mailto:srjusticejr@gmail.com`
+    + `?subject=${encodeURIComponent(subject)}`
+    + `&body=${encodeURIComponent(body)}`;
+
+  // Show success state
+  contactForm.style.display = 'none';
+  formSuccess.style.display = 'block';
+});
+
+
+/* ════════════════════════════════════════════════════════════════════
+   B) BAT CAVE — CANVAS GAME
+   ════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  const canvas = document.getElementById('bat-game');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // ── Logical game resolution ───────────────────────────────────────────
+  const W = 480, H = 300;
+  canvas.width  = W;
+  canvas.height = H;
+
+  // ── Game constants ────────────────────────────────────────────────────
+  const GRAV      = 0.10;   // gravity per frame — gentle float
+  const FLAP_VY   = -3.2;   // upward boost per click — soft and controlled
+  const PIPE_SPD  = 2.6;    // pipe scroll speed (px/frame)
+  const PIPE_W    = 52;     // pipe body width
+  const PIPE_CAP_H = 13;    // pipe cap height
+  const PIPE_CAP_X = 7;     // cap overhang each side
+  const PIPE_GAP  = 118;    // vertical gap the bat flies through
+  const MIN_PIPE  = 42;     // minimum pipe arm height
+  const CEIL_H    = 20;     // ceiling zone height
+  const FLOOR_H   = 26;     // floor zone height
+  const PLAY_H    = H - CEIL_H - FLOOR_H;
+  const BAT_X     = 90;     // bat's fixed x position
+  const SPAWN_INT = 1650;   // ms between pipe spawns
+
+  // ── Colors ───────────────────────────────────────────────────────────
+  const COL = {
+    brickA:   '#231d13',
+    brickB:   '#1b1610',
+    ceil:     '#0e0c08',
+    slime:    '#2a5c2a',
+    water:    '#193320',
+    pipeBody: '#384930',
+    pipeCap:  '#4a5f3d',
+    pipeShdw: '#252f1e',
+    drip:     'rgba(55,115,45,0.72)',
+    batWing:  '#2e1d50',   // slightly lighter purple — visible against dark sky
+    batBody:  '#4a3068',   // noticeably lighter body for contrast
+    batEye:   '#ff3030',   // brighter red eyes
+    score:    '#b6ddb6',
+    accent:   '#52b788',
+  };
+
+  // ── State ─────────────────────────────────────────────────────────────
+  const STATE   = { WAIT: 0, PLAY: 1, DEAD: 2 };
+  let state     = STATE.WAIT;
+  let bat       = { y: H / 2, vy: 0, flapTimer: 0 };
+  let pipes     = [];
+  let score     = 0;
+  let highScore = 0;
+  let lastSpawn = 0;
+  let deathTime = 0;
+  let bgScroll  = 0;
+
+  // ── Scene constants & pre-generated scenery ───────────────────────────
+  // BRICK_W/H are still used for the brick overlay drawn in drawBackground.
+  const BRICK_W = 46, BRICK_H = 18, MORTAR = 2;
+
+  // ── Wall holes: large openings scrolling at full pipe speed ──────────────
+  // wx positions are in pipe-speed world-space. WORLD_W = 9000px.
+  // At 2.6px/frame × 60fps = 156px/sec → loops every ~58 seconds.
+  // Spacings between holes vary (900–1400px) so the rhythm feels organic.
+  const WORLD_W = 9000;
+  const holes = [
+    { wx:  900, y: 44,  w: 140, h: 84,  scene: 'moonhill'  },
+    { wx: 2050, y: 96,  w: 110, h: 66,  scene: 'city'      },
+    { wx: 3300, y: 50,  w: 160, h: 90,  scene: 'graveyard' },
+    { wx: 4550, y: 88,  w: 124, h: 72,  scene: 'toxic'     },
+    { wx: 5700, y: 34,  w: 146, h: 78,  scene: 'moonhill'  },
+    { wx: 7000, y: 110, w: 114, h: 62,  scene: 'city'      },
+    { wx: 8100, y: 60,  w: 154, h: 86,  scene: 'graveyard' },
+  ];
+
+  // ── Game logic ────────────────────────────────────────────────────────
+
+  function startGame() {
+    bat       = { y: H / 2, vy: FLAP_VY, flapTimer: 16 };
+    pipes     = [];
+    score     = 0;
+    // Offset so the first pipe arrives after ~200ms, already scrolling in
+    lastSpawn = performance.now() - SPAWN_INT + 200;
+    state     = STATE.PLAY;
+  }
+
+  function handleInput() {
+    if (state === STATE.WAIT) {
+      startGame();
+    } else if (state === STATE.PLAY) {
+      bat.vy        = FLAP_VY;
+      bat.flapTimer = 16;
+    } else if (state === STATE.DEAD && Date.now() - deathTime > 800) {
+      state = STATE.WAIT;
+    }
+  }
+
+  canvas.addEventListener('click',      handleInput);
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleInput(); }, { passive: false });
+
+  function spawnPipe(now) {
+    const maxTop = PLAY_H - PIPE_GAP - MIN_PIPE;
+    const topH   = MIN_PIPE + Math.random() * maxTop;
+    pipes.push({
+      x:      W + 20,
+      topH:   topH,
+      botY:   CEIL_H + topH + PIPE_GAP,
+      scored: false,
+    });
+    lastSpawn = now;
+  }
+
+  function isColliding() {
+    const top = bat.y - 8, bot = bat.y + 8;
+    const lft = BAT_X - 9, rgt = BAT_X + 9;
+    if (top <= CEIL_H)      return true;
+    if (bot >= H - FLOOR_H) return true;
+    for (const p of pipes) {
+      if (rgt <= p.x || lft >= p.x + PIPE_W) continue;
+      if (top <= CEIL_H + p.topH) return true;
+      if (bot >= p.botY)          return true;
+    }
+    return false;
+  }
+
+  // ── Drawing ───────────────────────────────────────────────────────────
+
+  // ── Scene painters — one function per hole type ───────────────────────
+  // All flat colours, no gradients, no alpha — clean pixel-art style.
+
+  function drawMoonhill(hx, hy, hw, hh) {
+    // Night sky
+    ctx.fillStyle = '#1a2d50'; ctx.fillRect(hx, hy, hw, hh);
+    // Pixel stars
+    ctx.fillStyle = '#ffffff';
+    [[.10,.14],[.34,.07],[.64,.20],[.82,.10],[.50,.04],[.22,.18],[.76,.06]].forEach(([fx,fy]) => {
+      ctx.fillRect(Math.floor(hx + fx*hw), Math.floor(hy + fy*hh), 2, 2);
+    });
+    // Crescent moon
+    ctx.fillStyle = '#f5e8a8';
+    ctx.beginPath(); ctx.arc(hx + hw*.82, hy + hh*.22, 10, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#1a2d50';
+    ctx.beginPath(); ctx.arc(hx + hw*.82 + 5, hy + hh*.22 - 3, 8, 0, Math.PI*2); ctx.fill();
+    // Far hill
+    ctx.fillStyle = '#2a4a30';
+    ctx.beginPath(); ctx.moveTo(hx, hy+hh);
+    ctx.quadraticCurveTo(hx+hw*.28, hy+hh*.42, hx+hw*.58, hy+hh); ctx.fill();
+    // Near hill
+    ctx.fillStyle = '#1a3020';
+    ctx.beginPath(); ctx.moveTo(hx, hy+hh);
+    ctx.quadraticCurveTo(hx+hw*.52, hy+hh*.52, hx+hw, hy+hh); ctx.fill();
+    // Small tree silhouette
+    ctx.fillStyle = '#0f1f12';
+    ctx.fillRect(Math.floor(hx+hw*.38), Math.floor(hy+hh*.64), 3, 14);
+    ctx.beginPath(); ctx.arc(hx+hw*.39, hy+hh*.62, 7, 0, Math.PI*2); ctx.fill();
+  }
+
+  function drawCity(hx, hy, hw, hh) {
+    // Dark city sky
+    ctx.fillStyle = '#08081a'; ctx.fillRect(hx, hy, hw, hh);
+    // Dim stars
+    ctx.fillStyle = '#666688';
+    [[.14,.08],[.44,.14],[.74,.06],[.90,.20],[.28,.04]].forEach(([fx,fy]) => {
+      ctx.fillRect(Math.floor(hx+fx*hw), Math.floor(hy+fy*hh), 1, 1);
+    });
+    // Buildings — deterministic sizes, no random
+    const bldgs = [
+      {x:.00,w:.18,h:.62}, {x:.17,w:.13,h:.80}, {x:.29,w:.16,h:.52},
+      {x:.44,w:.20,h:.70}, {x:.62,w:.14,h:.58}, {x:.75,w:.25,h:.85},
+    ];
+    bldgs.forEach((b, bi) => {
+      const bx = Math.floor(hx + b.x*hw), bw = Math.floor(b.w*hw);
+      const bh = Math.floor(b.h*hh),      by = Math.floor(hy + hh - bh);
+      ctx.fillStyle = '#101022'; ctx.fillRect(bx, by, bw-1, bh);
+      // Windows — completely deterministic
+      for(let wy = 0; wy < Math.floor(bh/9)-1; wy++) {
+        for(let wx2 = 0; wx2 < Math.floor(bw/7)-1; wx2++) {
+          if(((bi*13 + wy*7 + wx2*5) % 10) > 3) {
+            ctx.fillStyle = ((bi+wy+wx2)%3===0) ? '#ffe888' : '#88ccff';
+            ctx.fillRect(bx+wx2*7+3, by+wy*9+5, 3, 4);
+          }
+        }
+      }
+    });
+  }
+
+  function drawGraveyard(hx, hy, hw, hh) {
+    // Gloomy sky
+    ctx.fillStyle = '#1c1828'; ctx.fillRect(hx, hy, hw, hh);
+    // Cloudy lighter band
+    ctx.fillStyle = '#26203a'; ctx.fillRect(hx, hy+hh*.08, hw, hh*.28);
+    // Dim moon
+    ctx.fillStyle = '#b8aad0';
+    ctx.beginPath(); ctx.arc(hx+hw*.74, hy+hh*.20, 9, 0, Math.PI*2); ctx.fill();
+    // Hill
+    ctx.fillStyle = '#100e0c';
+    ctx.beginPath(); ctx.moveTo(hx, hy+hh);
+    ctx.quadraticCurveTo(hx+hw*.5, hy+hh*.38, hx+hw, hy+hh); ctx.fill();
+    // Three tombstone crosses
+    [.22, .48, .72].forEach(gf => {
+      const gx = Math.floor(hx+gf*hw), gy = Math.floor(hy+hh*.50);
+      ctx.fillStyle = '#5a5568';
+      ctx.fillRect(gx-2, gy-12, 5, 14);   // upright
+      ctx.fillRect(gx-7, gy-9,  15, 3);   // cross arm
+      ctx.beginPath(); ctx.arc(gx+1, gy-12, 3, Math.PI, 0); ctx.fill(); // arch
+    });
+    // Dead bare tree right side
+    ctx.fillStyle = '#201c18';
+    ctx.fillRect(Math.floor(hx+hw*.84), Math.floor(hy+hh*.44), 4, Math.floor(hh*.56));
+    ctx.fillRect(Math.floor(hx+hw*.76), Math.floor(hy+hh*.52), Math.floor(hw*.16), 3);
+    ctx.fillRect(Math.floor(hx+hw*.80), Math.floor(hy+hh*.61), Math.floor(hw*.09), 2);
+  }
+
+  function drawToxic(hx, hy, hw, hh) {
+    // Dark industrial bg
+    ctx.fillStyle = '#141410'; ctx.fillRect(hx, hy, hw, hh);
+    // Warning stripe header
+    for(let i = 0; i < 6; i++) {
+      ctx.fillStyle = i%2===0 ? '#e8b800' : '#181800';
+      ctx.fillRect(Math.floor(hx + i*(hw/6)), hy, Math.ceil(hw/6)+1, 7);
+    }
+    // Barrels
+    [[.08,.36,.17],[.30,.43,.17],[.70,.39,.19]].forEach(([bx,by,bw]) => {
+      ctx.fillStyle = '#252512';
+      ctx.fillRect(Math.floor(hx+bx*hw), Math.floor(hy+by*hh), Math.floor(bw*hw), Math.floor((1-by)*hh*.82));
+      // Band
+      ctx.fillStyle = '#3a3820';
+      ctx.fillRect(Math.floor(hx+bx*hw), Math.floor(hy+(by+.14)*hh), Math.floor(bw*hw), 3);
+    });
+    // Toxic pool
+    ctx.fillStyle = '#286010'; ctx.fillRect(hx, Math.floor(hy+hh*.72), hw, Math.ceil(hh*.28));
+    // Pool highlight line
+    ctx.fillStyle = '#50a820'; ctx.fillRect(hx, Math.floor(hy+hh*.72), hw, 3);
+    // Bubbles — fixed positions
+    ctx.fillStyle = '#80e040';
+    [[.14,.80],[.38,.78],[.64,.83],[.86,.77]].forEach(([fx,fy]) => {
+      ctx.beginPath(); ctx.arc(hx+fx*hw, hy+fy*hh, 3, 0, Math.PI*2); ctx.fill();
+    });
+  }
+
+  // ── Main background renderer — three parallax layers ─────────────────────
+  function drawBackground() {
+    // Each layer uses a fraction of bgScroll (which advances at PIPE_SPD).
+    // Smaller fraction = farther away = moves slower = sense of depth.
+    const far = bgScroll * 0.18;   // distant tunnel layer  (~0.47 px/frame)
+    const mid = bgScroll * 0.46;   // stone wall mid-layer  (~1.20 px/frame)
+    // Front bricks and holes use bgScroll directly (full pipe speed).
+
+    // ── FAR LAYER: deep sewer tunnel atmosphere ───────────────────────────
+    // Near-black teal base
+    ctx.fillStyle = '#050d0c';
+    ctx.fillRect(0, 0, W, H);
+
+    // Circular tunnel mouths — suggesting infinite depth down the sewer
+    const tDefs = [{ox:55,y:148,r:44},{ox:255,y:124,r:36},{ox:435,y:162,r:50}];
+    for (const t of tDefs) {
+      const tx = ((t.ox - far) % (W + 130) + (W + 130)) % (W + 130) - 65;
+      ctx.fillStyle = '#0f2222'; // lighter ring around mouth
+      ctx.beginPath(); ctx.arc(tx, t.y, t.r + 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#020b09'; // dark tunnel void
+      ctx.beginPath(); ctx.arc(tx, t.y, t.r,     0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#081818'; // inner wall rim
+      ctx.beginPath(); ctx.arc(tx, t.y, t.r - 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#020b09';
+      ctx.beginPath(); ctx.arc(tx, t.y, t.r - 9, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Distant horizontal pipe silhouettes (static — just fill lines)
+    [[52, 4, '#0b1c1a'], [196, 7, '#0d2020'], [246, 3, '#091616']].forEach(([py, ph, c]) => {
+      ctx.fillStyle = c;
+      ctx.fillRect(0, py, W, ph);
+      ctx.fillStyle = '#060f0e';
+      ctx.fillRect(0, py + ph - 1, W, 1);
+    });
+
+    // Subtle vertical water-drip streaks
+    for (let i = 0; i < 8; i++) {
+      const dx = ((i * 69 + far * 0.15) % (W + 8));
+      ctx.fillStyle = '#081514';
+      ctx.fillRect(Math.floor(dx), 0, 1, H);
+    }
+
+    // ── MID LAYER: stone wall with moss and crossing pipes ────────────────
+    // Larger bricks than the foreground — reinforces depth
+    const MB_W = 64, MB_H = 25, MB_M = 4;
+    const midOff = mid % MB_W;
+    for (let row = 0; row <= Math.ceil(H / MB_H); row++) {
+      const rowOff = (row % 2) * (MB_W / 2);
+      for (let col = -1; col <= Math.ceil(W / MB_W) + 1; col++) {
+        const bx    = col * MB_W + rowOff - midOff;
+        const by    = row * MB_H;
+        const shade = (row * 11 + col * 7) % 3;
+        ctx.fillStyle = ['#0e201d', '#11251f', '#0c1c1a'][shade];
+        ctx.fillRect(bx + MB_M, by + MB_M, MB_W - MB_M * 2, MB_H - MB_M * 2);
+      }
+    }
+
+    // Moss patches at seeded world positions, scrolling at mid speed
+    const mossDefs = [{ox:100,y:72},{ox:240,y:136},{ox:368,y:56},{ox:44,y:196},{ox:422,y:172},{ox:176,y:218}];
+    ctx.fillStyle = '#0d2816';
+    for (const m of mossDefs) {
+      const mx = ((m.ox - mid * 0.5) % (W + 100) + (W + 100)) % (W + 100) - 50;
+      ctx.beginPath(); ctx.ellipse(mx,      m.y,     17, 10, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(mx + 12, m.y + 5, 11,  7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(mx -  8, m.y + 4,  8,  5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Two horizontal background pipes with bolt flanges
+    [[86, 11, '#183535'], [210, 8, '#122e2e']].forEach(([py, ph, col]) => {
+      ctx.fillStyle = col;
+      ctx.fillRect(0, py, W, ph);
+      ctx.fillStyle = '#0a2222'; // shadow underline
+      ctx.fillRect(0, py + ph - 2, W, 2);
+      // Flanges (bolt joints) every ~170px, scrolling with mid layer
+      for (let fx = (mid * 0.45) % 170; fx < W + 20; fx += 170) {
+        ctx.fillStyle = '#204848';
+        ctx.fillRect(Math.floor(fx) - 8, py - 4, 16, ph + 8);
+        ctx.fillStyle = '#0e2c2c'; // shadow side of flange
+        ctx.fillRect(Math.floor(fx) - 8, py - 4, 3, ph + 8);
+      }
+    });
+
+    // ── FRONT LAYER: close brick wall with hole windows ───────────────────
+    const offset = bgScroll % WORLD_W;
+
+    // Clip and paint each scene window
+    for (const h of holes) {
+      let sx = h.wx - offset;
+      if (sx < -(h.w + 4)) sx += WORLD_W;
+      if (sx > W + 4) continue;
+      const hy2 = CEIL_H + h.y;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(sx, hy2, h.w, h.h); ctx.clip();
+      if (h.scene === 'moonhill')  drawMoonhill(sx, hy2, h.w, h.h);
+      if (h.scene === 'city')      drawCity(sx, hy2, h.w, h.h);
+      if (h.scene === 'graveyard') drawGraveyard(sx, hy2, h.w, h.h);
+      if (h.scene === 'toxic')     drawToxic(sx, hy2, h.w, h.h);
+      ctx.restore();
+    }
+
+    // Front brick wall — skip bricks inside any hole
+    const brickOffX = bgScroll % BRICK_W;
+    for (let row = 0; row <= Math.ceil(H / BRICK_H); row++) {
+      const rowOff = (row % 2) * (BRICK_W / 2);
+      for (let col = -1; col <= Math.ceil(W / BRICK_W) + 2; col++) {
+        const bx  = col * BRICK_W + rowOff - brickOffX;
+        const by  = row * BRICK_H;
+        const bcx = bx + BRICK_W / 2;
+        const bcy = by + BRICK_H / 2;
+        let skip = false;
+        for (const h of holes) {
+          let sx = h.wx - offset;
+          if (sx < -(h.w + 4)) sx += WORLD_W;
+          if (sx > W + 4) continue;
+          if (bcx > sx && bcx < sx + h.w && bcy > CEIL_H + h.y && bcy < CEIL_H + h.y + h.h) {
+            skip = true; break;
+          }
+        }
+        if (skip) continue;
+        const v = (row * 5 + col * 3) % 3;
+        ctx.fillStyle = ['#221c12', '#1e1910', '#251f14'][v];
+        ctx.fillRect(bx + MORTAR, by + MORTAR, BRICK_W - MORTAR * 2, BRICK_H - MORTAR * 2);
+      }
+    }
+
+    // Foreground slime drips from the ceiling zone
+    ctx.fillStyle = '#2e7a28';
+    const slimeDefs = [{ox:90},{ox:195},{ox:318},{ox:435}];
+    for (const s of slimeDefs) {
+      const sx = ((s.ox - bgScroll) % (W + 50) + (W + 50)) % (W + 50) - 25;
+      const dripH = 7 + (s.ox * 7 % 14);
+      ctx.fillRect(Math.floor(sx), CEIL_H, 4, dripH);
+      ctx.beginPath(); ctx.arc(Math.floor(sx) + 2, CEIL_H + dripH, 4, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function drawCeiling() {
+    ctx.fillStyle = COL.ceil;
+    ctx.fillRect(0, 0, W, CEIL_H);
+    ctx.fillStyle = COL.slime;
+    ctx.fillRect(0, CEIL_H - 3, W, 3);
+    for (let i = 0; i < 7; i++) {
+      const dx = (i * 73 + 25) % W;
+      ctx.beginPath();
+      ctx.arc(dx, CEIL_H + 2 + (i % 3), 2 + (i % 2), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawFloor() {
+    ctx.fillStyle = COL.ceil;
+    ctx.fillRect(0, H - FLOOR_H, W, FLOOR_H);
+    ctx.fillStyle = COL.water;
+    ctx.fillRect(0, H - FLOOR_H, W, 5);
+    ctx.fillStyle = 'rgba(40,90,55,0.22)';
+    ctx.fillRect(0, H - FLOOR_H + 5, W, 4);
+  }
+
+  function drawPipes(now) {
+    for (const p of pipes) {
+      const x = p.x;
+
+      // Top pipe
+      ctx.fillStyle = COL.pipeBody;
+      ctx.fillRect(x, CEIL_H, PIPE_W, p.topH);
+      ctx.fillStyle = COL.pipeShdw;
+      ctx.fillRect(x + PIPE_W - 9, CEIL_H, 7, p.topH);
+      ctx.fillStyle = 'rgba(255,255,255,0.035)';
+      ctx.fillRect(x, CEIL_H, 5, p.topH);
+      ctx.fillStyle = COL.pipeCap;
+      ctx.fillRect(x - PIPE_CAP_X, CEIL_H + p.topH - PIPE_CAP_H, PIPE_W + PIPE_CAP_X * 2, PIPE_CAP_H);
+      ctx.fillStyle = COL.pipeShdw;
+      ctx.fillRect(x + PIPE_W - PIPE_CAP_X, CEIL_H + p.topH - PIPE_CAP_H, 7, PIPE_CAP_H);
+
+      // Slime drip
+      const dripLen = 6 + Math.sin(now * 0.0015 + x * 0.05) * 3;
+      ctx.fillStyle = COL.drip;
+      ctx.fillRect(x + 10, CEIL_H + p.topH, 3, dripLen);
+      ctx.beginPath();
+      ctx.arc(x + 11.5, CEIL_H + p.topH + dripLen, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bottom pipe
+      const botH = H - FLOOR_H - p.botY;
+      ctx.fillStyle = COL.pipeBody;
+      ctx.fillRect(x, p.botY, PIPE_W, botH);
+      ctx.fillStyle = COL.pipeShdw;
+      ctx.fillRect(x + PIPE_W - 9, p.botY, 7, botH);
+      ctx.fillStyle = 'rgba(255,255,255,0.035)';
+      ctx.fillRect(x, p.botY, 5, botH);
+      ctx.fillStyle = COL.pipeCap;
+      ctx.fillRect(x - PIPE_CAP_X, p.botY, PIPE_W + PIPE_CAP_X * 2, PIPE_CAP_H);
+      ctx.fillStyle = COL.pipeShdw;
+      ctx.fillRect(x + PIPE_W - PIPE_CAP_X, p.botY, 7, PIPE_CAP_H);
+    }
+  }
+
+  function drawBat(x, y, vy, flapTimer) {
+    ctx.save();
+    ctx.translate(x, y);
+    const tilt = Math.max(-0.42, Math.min(0.55, vy * 0.052));
+    ctx.rotate(tilt);
+
+    const f    = Math.min(1, flapTimer / 16);
+    const lerp = (a, b) => a + (b - a) * f;
+
+    // Left wing
+    ctx.fillStyle = COL.batWing;
+    ctx.beginPath();
+    ctx.moveTo(-3, 2);
+    ctx.bezierCurveTo(lerp(-8,-10), lerp(1,-13), lerp(-20,-22), lerp(9,-5), lerp(-27,-23), lerp(9,-13));
+    ctx.bezierCurveTo(lerp(-20,-18), lerp(13,4), lerp(-10,-8), lerp(11,6), -3, 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // Right wing
+    ctx.beginPath();
+    ctx.moveTo(3, 2);
+    ctx.bezierCurveTo(lerp(8,10), lerp(1,-13), lerp(20,22), lerp(9,-5), lerp(27,23), lerp(9,-13));
+    ctx.bezierCurveTo(lerp(20,18), lerp(13,4), lerp(10,8), lerp(11,6), 3, 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // Body
+    ctx.fillStyle = COL.batBody;
+    ctx.beginPath();
+    ctx.ellipse(0, 2, 8, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ears
+    ctx.fillStyle = COL.batBody;
+    ctx.beginPath(); ctx.moveTo(-4,-3); ctx.lineTo(-8,-12); ctx.lineTo(-1,-4); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo( 4,-3); ctx.lineTo( 8,-12); ctx.lineTo( 1,-4); ctx.closePath(); ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = COL.batEye;
+    ctx.beginPath(); ctx.arc(-3, 1, 1.9, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 3, 1, 1.9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,160,160,0.85)';
+    ctx.beginPath(); ctx.arc(-2.3, 0.3, 0.65, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc( 3.7, 0.3, 0.65, 0, Math.PI * 2); ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawHUD() {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "DM Mono", monospace';
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillText(score, W / 2 + 1, CEIL_H + 32 + 1);
+    ctx.fillStyle = COL.score;
+    ctx.fillText(score, W / 2, CEIL_H + 32);
+    ctx.font = '11px "DM Mono", monospace';
+    ctx.fillStyle = 'rgba(150,205,150,0.5)';
+    ctx.fillText('BEST ' + highScore, W / 2, CEIL_H + 48);
+  }
+
+  function drawWaitScreen() {
+    ctx.fillStyle = 'rgba(11,9,5,0.74)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center';
+    ctx.font      = 'bold 28px "DM Serif Display", serif';
+    ctx.fillStyle = COL.accent;
+    ctx.fillText('BAT CAVE', W / 2, H / 2 - 24);
+    ctx.font      = '13px "DM Sans", sans-serif';
+    ctx.fillStyle = '#bcdcbc';
+    ctx.fillText('Dodge the sewer pipes', W / 2, H / 2 + 2);
+    ctx.font      = '12px "DM Sans", sans-serif';
+    ctx.fillStyle = 'rgba(155,205,155,0.65)';
+    ctx.fillText('Click or tap to start', W / 2, H / 2 + 22);
+    if (highScore > 0) {
+      ctx.font      = '11px "DM Mono", monospace';
+      ctx.fillStyle = 'rgba(130,190,130,0.5)';
+      ctx.fillText('BEST ' + highScore, W / 2, H / 2 + 44);
+    }
+  }
+
+  function drawDeadScreen() {
+    ctx.fillStyle = 'rgba(11,9,5,0.77)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center';
+    ctx.font      = 'bold 28px "DM Serif Display", serif';
+    ctx.fillStyle = '#ff5252';
+    ctx.fillText('SPLAT!', W / 2, H / 2 - 34);
+    ctx.font      = '15px "DM Sans", sans-serif';
+    ctx.fillStyle = COL.score;
+    ctx.fillText('Score: ' + score, W / 2, H / 2 - 6);
+    ctx.fillStyle = COL.accent;
+    ctx.fillText('Best:  ' + highScore, W / 2, H / 2 + 18);
+    if (Date.now() - deathTime > 800) {
+      ctx.font      = '12px "DM Sans", sans-serif';
+      ctx.fillStyle = 'rgba(150,205,150,0.7)';
+      ctx.fillText('Click to try again', W / 2, H / 2 + 44);
+    }
+  }
+
+  // ── Main loop ─────────────────────────────────────────────────────────
+  function loop(now) {
+    requestAnimationFrame(loop);
+
+    if (state === STATE.PLAY) {
+      bat.vy += GRAV;
+      bat.y  += bat.vy;
+      bat.flapTimer = Math.max(0, bat.flapTimer - 1);
+      bgScroll += PIPE_SPD;   // drives all parallax layers; holes use full value
+
+      if (now - lastSpawn >= SPAWN_INT) spawnPipe(now);
+
+      for (const p of pipes) {
+        p.x -= PIPE_SPD;
+        if (!p.scored && p.x + PIPE_W < BAT_X) {
+          p.scored = true;
+          score++;
+          if (score > highScore) highScore = score;
+        }
+      }
+
+      pipes = pipes.filter(p => p.x > -(PIPE_W + PIPE_CAP_X * 2 + 15));
+
+      if (isColliding()) { state = STATE.DEAD; deathTime = Date.now(); }
+    }
+
+    if (state === STATE.WAIT) {
+      bat.y  = H / 2 + Math.sin(now * 0.002) * 10;
+      bat.vy = Math.cos(now * 0.002) * 0.2;
+      bat.flapTimer = 0;
+    }
+
+    drawBackground();
+    drawPipes(now);
+    drawCeiling();
+    drawFloor();
+    drawBat(BAT_X, bat.y, bat.vy, bat.flapTimer);
+
+    if (state === STATE.PLAY) drawHUD();
+    if (state === STATE.WAIT) drawWaitScreen();
+    if (state === STATE.DEAD) { drawHUD(); drawDeadScreen(); }
+  }
+
+  requestAnimationFrame(loop);
+
+})();
+
+</script>
+
+</body>
+</html>
